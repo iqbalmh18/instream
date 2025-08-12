@@ -1,4 +1,5 @@
-[![instream.png](https://i.postimg.cc/kXfVzXVd/Desain-tanpa-judul.png)](https://postimg.cc/QHKxWDk6)
+![light](https://i.postimg.cc/MzjkT3Dy/20250812-153206.png)
+![dark](https://i.postimg.cc/8182rdKx/20250812-153359.png)
 
 ## Introduction
 InStream is a Flask-based web application for managing Instagram live streaming sessions.  
