@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - InStream</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="connection-status" id="connection-status">
+        <span class="material-icons" style="font-size: 14px;">wifi</span> Connected
+    </div>
+    <div class="container">
+        <div class="navbar">
+            <div class="navbar-top">
+                <h1 class="app-title">
+                    <span class="material-icons">camera</span>
+                    InStream
+                </h1>
+                <div class="navbar-actions">
+                    <a href="/dashboard" class="button info-button">
+                        <span class="material-icons">dashboard</span>
+                        Dashboard
+                    </a>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons">brightness_6</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="alert-container"></div>
+        <div class="card cookie-setup-card" id="cookie-setup">
+            <div class="card-header" style="cursor: pointer;">
+                <h3 class="card-title">
+                    <span class="material-icons">cookie</span>
+                    Cookies
+                </h3>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="cookie-status" id="cookie-status">
+                        <span class="material-icons">error_outline</span>
+                        Unauthorized
+                    </div>
+                    <button class="button secondary-button" id="toggle-cookie-btn" onclick="toggleCookieSetup()" style="margin-left: 10px;">
+                        <span class="material-icons">expand_more</span>
+                    </button>
+                </div>
+            </div>
+            <div class="cookie-setup-content" id="cookie-setup-content">
+                <div class="form-group">
+                    <label for="cookies" class="form-label">Instagram Cookies:</label>
+                    <textarea class="form-textarea" id="cookies" placeholder="Paste your instagram session cookies here..." required></textarea>
+                    <small class="form-help">
+                        <span class="material-icons" style="font-size: 12px;">info</span>
+                        <p style="font-size: 11px;">Get Instagram Cookies: Developer Tools > F12 > Inspect > Application > Storage > Cookies</p>
+                    </small>
+                </div>
+                <div class="cookie-actions">
+                    <button class="button primary-button" onclick="saveCookies()" id="save-cookies-btn">
+                        <span class="material-icons">save</span>
+                        Save Cookies
+                    </button>
+                    <button class="button info-button" onclick="testCookies()" id="test-cookies-btn">
+                        <span class="material-icons">verified_user</span>
+                        Test Cookies
+                    </button>
+                    <button class="button secondary-button" onclick="clearCookies()" id="clear-cookies-btn">
+                        <span class="material-icons">delete</span>
+                        Clear Cookies
+                    </button>
+                </div>
+                <div class="cookie-info" id="cookie-info" style="display: none;">
+                    <div class="cookie-details" style="display: noen;">
+                        <h4>Session Information:</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Username:</span>
+                                <span class="info-value" id="ig-username">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">User ID:</span>
+                                <span class="info-value" id="ig-userid">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Saved At:</span>
+                                <span class="info-value" id="cookie-saved-time">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value" id="cookie-validity">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-grid">
+            <div class="card stream-setup-card" id="stream-setup">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="material-icons">settings</span>
+                        Settings
+                    </h3>
+                    <div class="setup-lock" id="setup-lock">
+                        <span class="material-icons">lock</span>
+                        Unauthorized
+                    </div>
+                </div>
+                
+                <div class="setup-content" id="setup-content">
+                    <div class="form-group">
+                        <label class="form-label">Video Sources:</label>
+                        <div class="video-tabs">
+                            <button class="video-tab active" onclick="toggleVideoSource('upload')" id="upload-tab">
+                                <span class="material-icons">cloud_upload</span>
+                                Upload
+                            </button>
+                            <button class="video-tab" onclick="toggleVideoSource('download')" id="download-tab">
+                                <span class="material-icons">download</span>
+                                Download
+                            </button>
+                            <button class="video-tab" onclick="toggleVideoSource('select')" id="select-tab">
+                                <span class="material-icons">video_library</span>
+                                Library
+                            </button>
+                        </div>
+                        <div class="upload-area" id="upload-area" onclick="document.getElementById('video-file').click()">
+                            <input type="file" id="video-file" accept="video/*" style="display: none;">
+                            <span class="material-icons" style="font-size: 2rem;">cloud_upload</span>
+                            <p>Click to select video file</p>
+                            <small>Drag & drop supported (Max: 1GB)</small>
+                        </div>
+                        <div class="video-selector" id="download-selector">
+                            <div class="form-group">
+                                <label for="download-url" class="form-label">Instagram Post URL:</label>
+                                <input type="text" class="form-input" id="download-url" placeholder="https://www.instagram.com/reel/...">
+                                <small class="form-help">
+                                    <span class="material-icons" style="font-size: 12px;">info</span>
+                                    <p style="font-size: 12px;">Paste instagram post URL to download</p>
+                                </small>
+                            </div>
+                            <button class="button primary-button full-width" onclick="downloadVideo()" id="download-btn">
+                                <span class="material-icons">download</span>
+                                Download Video
+                            </button>
+                            <div class="download-status" id="download-status" style="display: none; margin-top: 1rem;">
+                            </div>
+                        </div>
+                        <div class="video-selector" id="video-selector">
+                            <div class="video-list" id="video-list">
+                                <p class="text-center" style="padding: 20px; opacity: 0.6;">Loading videos...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="title" class="form-label">Stream Title:</label>
+                        <input type="text" class="form-input" id="title" value="Live Stream" placeholder="Enter stream title...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stream Duration (Hours, Minutes, Seconds):</label>
+                        <div class="form-row">
+                            <input type="number" class="form-input" id="hours" placeholder="Hours" min="0" value="0">
+                            <input type="number" class="form-input" id="minutes" placeholder="Minutes" min="0" value="30">
+                            <input type="number" class="form-input" id="seconds" placeholder="Seconds" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="button-grid">
+                        <button class="button primary-button" onclick="startStream()" id="start-btn">
+                            <span class="material-icons">play_arrow</span>
+                            Start
+                        </button>
+                        <button class="button danger-button" onclick="stopStream()" id="stop-btn" disabled>
+                            <span class="material-icons">stop</span>
+                            Stop
+                        </button>
+                        <button class="button info-button" onclick="refreshStats()" id="refresh-btn">
+                            <span class="material-icons">refresh</span>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="material-icons">analytics</span>
+                        Status
+                    </h3>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Status:</label>
+                    <p id="stream-status">
+                        <span class="status-indicator status-offline"></span>
+                        Offline
+                    </p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="viewer-count">0</div>
+                        <div class="stat-label">Viewers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="comment-count">0</div>
+                        <div class="stat-label">Comments</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="duration">00:00</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="session-id">-</div>
+                        <div class="stat-label">Session</div>
+                    </div>
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="broadcast-id" class="form-label">Broadcast ID:</label>
+                    <input type="text" class="form-input" id="broadcast-id" readonly placeholder="Not available">
+                </div>
+            </div>
+        </div>
+        <div class="card full-width">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="material-icons">chat</span>
+                    Live Comments: <span id="comment-counter">0</span>
+                </h3>
+            </div>
+            <div class="comments-container" id="comments-container">
+                <p class="text-center" style="opacity: 0.6;">Start streaming to see live comments</p>
+            </div>
+            <br>
+            <div class="comment-form">
+                <input 
+                    type="text" 
+                    id="comment-input" 
+                    placeholder="Type your comment here..." 
+                    class="form-input"
+                >
+                <button 
+                    onclick="postComment()" 
+                    id="comment-btn"
+                    class="button primary-button"
+                >
+                    <span class="material-icons">send</span>
+                    Send
+                </button>
+            </div>
+        </div>
+        <div class="footer-text">
+            © 2025 InStream. All Rights Reserved
+        </div>
+    </div>
+    <script>
+        let streamInterval = null;
+        let commentsInterval = null;
+        let startTime = null;
+        let commentCount = 0;
+        let isConnected = true;
+        let lastCommentIds = new Set();
+        let selectedVideo = null;
+        let uploadedVideos = [];
+        let currentVideoSource = 'upload';
+        let cookiesValidated = false;
+        let sessionInfo = null;
+        let streamDurationMs = 0; // Duration in milliseconds
+        let durationCheckInterval = null;
+        let cookieSetupVisible = true;
+        
+        function toggleCookieSetup() {
+            const content = document.getElementById('cookie-setup-content');
+            const toggleBtn = document.getElementById('toggle-cookie-btn');
+            const icon = toggleBtn.querySelector('.material-icons');
+            
+            if (cookieSetupVisible) {
+                content.style.display = 'none';
+                icon.textContent = 'expand_more';
+                cookieSetupVisible = false;
+            } else {
+                content.style.display = 'block';
+                icon.textContent = 'expand_less';
+                cookieSetupVisible = true;
+            }
+        }
+        
+        function autohideCookieSetup() {
+            if (cookiesValidated && sessionInfo) {
+                const content = document.getElementById('cookie-setup-content');
+                const toggleBtn = document.getElementById('toggle-cookie-btn');
+                const icon = toggleBtn.querySelector('.material-icons');
+                
+                content.style.display = 'none';
+                icon.textContent = 'expand_more';
+                cookieSetupVisible = false;
+                
+                toggleBtn.title = 'Click to show session setup';
+            }
+        }
+        
+        function loadSavedCookies() {
+            const savedCookies = localStorage.getItem('ig_cookies');
+            const sessionData = JSON.parse(localStorage.getItem('ig_session_info') || '{}');
+            
+            if (savedCookies && sessionData.username) {
+                document.getElementById('cookies').value = savedCookies;
+                sessionInfo = sessionData;
+                updateCookieStatus(true);
+                enableStreamSetup();
+                populateSessionInfo();
+                cookiesValidated = true;
+                autohideCookieSetup();
+            }
+        }
+        
+        async function saveCookies() {
+            const cookies = document.getElementById('cookies').value.trim();
+            const saveBtn = document.getElementById('save-cookies-btn');
+            
+            if (!cookies) {
+                showAlert('Please provide instagram cookies', 'error');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Validating...';
+            
+            try {
+                const response = await fetch('/api/validate-cookies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `cookies=${encodeURIComponent(cookies)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('ig_cookies', cookies);
+                    localStorage.setItem('ig_session_info', JSON.stringify({
+                        username: result.username || 'Unknown',
+                        userid: result.userid || 'Unknown',
+                        saved_at: new Date().toISOString(),
+                        valid: true
+                    }));
+                    
+                    sessionInfo = {
+                        username: result.username || 'Unknown',
+                        userid: result.userid || 'Unknown',
+                        saved_at: new Date().toISOString(),
+                        valid: true
+                    };
+                    
+                    updateCookieStatus(true);
+                    enableStreamSetup();
+                    populateSessionInfo();
+                    
+                    showAlert('Instagram cookies saved successfully!', 'success');
+                    cookiesValidated = true;
+                    
+                    setTimeout(autohideCookieSetup, 1500);
+                } else {
+                    showAlert(`Invalid cookies: ${result.message}`, 'error');
+                    updateCookieStatus(false);
+                    disableStreamSetup();
+                }
+            } catch (error) {
+                showAlert(`Invalid cookies: ${error.message}`, 'error');
+                updateCookieStatus(false);
+                disableStreamSetup();
+                updateConnectionStatus(false);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<span class="material-icons">save</span> Save Cookies';
+            }
+        }
+        
+        function clearCookies() {
+            if (confirm('Are you sure want to clear saved cookies?')) {
+                localStorage.removeItem('ig_cookies');
+                localStorage.removeItem('ig_session_info');
+                document.getElementById('cookies').value = '';
+                sessionInfo = null;
+                cookiesValidated = false;
+                
+                updateCookieStatus(false);
+                disableStreamSetup();
+                document.getElementById('cookie-info').style.display = 'none';
+                
+                const content = document.getElementById('cookie-setup-content');
+                const toggleBtn = document.getElementById('toggle-cookie-btn');
+                const icon = toggleBtn.querySelector('.material-icons');
+                
+                content.style.display = 'block';
+                icon.textContent = 'expand_less';
+                cookieSetupVisible = true;
+                
+                showAlert('Instagram cookies cleared', 'info');
+            }
+        }
+        
+        async function testCookies() {
+            const cookies = document.getElementById('cookies').value.trim() || localStorage.getItem('ig_cookies');
+            const testBtn = document.getElementById('test-cookies-btn');
+            
+            if (!cookies) {
+                showAlert('No instagram cookies provided', 'error');
+                return;
+            }
+            
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Testing...';
+            
+            try {
+                const response = await fetch('/api/validate-cookies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `cookies=${encodeURIComponent(cookies)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Test connection stable', 'success');
+                    updateCookieStatus(true);
+                } else {
+                    showAlert(`Test connection failed: ${result.message}`, 'error');
+                    updateCookieStatus(false);
+                }
+            } catch (error) {
+                showAlert(`Test connection error: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<span class="material-icons">verified_user</span> Test Cookies';
+            }
+        }
+        
+        function updateCookieStatus(isValid) {
+            const statusElement = document.getElementById('cookie-status');
+            
+            if (isValid) {
+                statusElement.className = 'cookie-status valid';
+                statusElement.innerHTML = '<span class="material-icons">check_circle</span> Valid';
+            } else {
+                statusElement.className = 'cookie-status invalid';
+                statusElement.innerHTML = '<span class="material-icons">error_outline</span> Required';
+            }
+        }
+        
+        function enableStreamSetup() {
+            const setupCard = document.getElementById('stream-setup');
+            const setupContent = document.getElementById('setup-content');
+            const setupLock = document.getElementById('setup-lock');
+            
+            setupCard.classList.remove('disabled');
+            setupContent.classList.remove('disabled');
+            setupLock.style.display = 'none';
+            
+            const formElements = setupContent.querySelectorAll('input, button, textarea, select');
+            formElements.forEach(element => {
+                element.disabled = false;
+            });
+        }
+        
+        function disableStreamSetup() {
+            const setupCard = document.getElementById('stream-setup');
+            const setupContent = document.getElementById('setup-content');
+            const setupLock = document.getElementById('setup-lock');
+            
+            setupCard.classList.add('disabled');
+            setupContent.classList.add('disabled');
+            setupLock.style.display = 'flex';
+            
+            const formElements = setupContent.querySelectorAll('input, button, textarea, select');
+            formElements.forEach(element => {
+                element.disabled = true;
+            });
+        }
+        
+        function populateSessionInfo() {
+            if (sessionInfo) {
+                document.getElementById('ig-username').textContent = sessionInfo.username;
+                document.getElementById('ig-userid').textContent = sessionInfo.userid;
+                document.getElementById('cookie-saved-time').textContent = new Date(sessionInfo.saved_at).toLocaleString();
+                document.getElementById('cookie-validity').textContent = sessionInfo.valid ? 'Valid' : 'Invalid';
+                document.getElementById('cookie-info').style.display = 'block';
+            }
+        }
+        
+        function calculateStreamDuration() {
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            
+            return (hours * 3600 + minutes * 60 + seconds) * 1000; // Convert to milliseconds
+        }
+        
+        function checkStreamDuration() {
+            if (startTime && streamDurationMs > 0) {
+                const elapsed = Date.now() - startTime;
+                
+                if (elapsed >= streamDurationMs) {
+                    console.log('Stream duration limit reached, stopping stream...');
+                    showAlert('Stream duration limit reached, stopping stream', 'info');
+                    stopStream();
+                }
+            }
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        
+        function toggleVideoSource(source) {
+            if (!cookiesValidated) {
+                showAlert('Please provide instagram cookies first', 'error');
+                return;
+            }
+            
+            currentVideoSource = source;
+            const uploadArea = document.getElementById('upload-area');
+            const downloadSelector = document.getElementById('download-selector');
+            const videoSelector = document.getElementById('video-selector');
+            
+            document.querySelectorAll('.video-tab').forEach(tab => tab.classList.remove('active'));
+            
+            uploadArea.style.display = 'none';
+            downloadSelector.classList.remove('show');
+            videoSelector.classList.remove('show');
+            
+            if (source === 'upload') {
+                uploadArea.style.display = 'block';
+                document.getElementById('upload-tab').classList.add('active');
+            } else if (source === 'download') {
+                downloadSelector.classList.add('show');
+                document.getElementById('download-tab').classList.add('active');
+            } else if (source === 'select') {
+                videoSelector.classList.add('show');
+                document.getElementById('select-tab').classList.add('active');
+                loadVideoList();
+            }
+        }
+        
+        async function downloadVideo() {
+            if (!cookiesValidated) {
+                showAlert('Please provide instagram cookies first', 'error');
+                return;
+            }
+            
+            const url = document.getElementById('download-url').value.trim();
+            const downloadBtn = document.getElementById('download-btn');
+            const statusDiv = document.getElementById('download-status');
+            
+            if (!url) {
+                showAlert('Please enter an instagram URL', 'error');
+                return;
+            }
+            
+            if (!url.includes('instagram.com/')) {
+                showAlert('Please enter a valid instagram URL', 'error');
+                return;
+            }
+            
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Downloading...';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `
+                <div class="alert info">
+                    <span class="material-icons">info</span>
+                    Downloading video from instagram...
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `url=${encodeURIComponent(url)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = `
+                        <div class="alert success">
+                            <span class="material-icons">check_circle</span>
+                            Video downloaded successfully!<br>
+                            <small>Filename: ${result.filename} (${result.filesize})</small>
+                        </div>
+                    `;
+                    showAlert('Video downloaded successfully!', 'success');
+                    
+                    if (currentVideoSource === 'select') {
+                        loadVideoList();
+                    }
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert error">
+                            <span class="material-icons">error</span>
+                            Download failed: ${result.message || 'Unknown error'}
+                        </div>
+                    `;
+                    showAlert('Failed to download from URL', 'error');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert error">
+                        <span class="material-icons">error</span>
+                        Network error: ${error.message}
+                    </div>
+                `;
+                showAlert('Network error during download', 'error');
+                updateConnectionStatus(false);
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<span class="material-icons">download</span> Download Video';
+            }
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            if (connected !== isConnected) {
+                isConnected = connected;
+                if (connected) {
+                    statusEl.className = 'connection-status connection-online';
+                    statusEl.innerHTML = '<span class="material-icons" style="font-size: 14px;">wifi</span> Connected';
+                    statusEl.classList.remove('show');
+                } else {
+                    statusEl.className = 'connection-status connection-offline';
+                    statusEl.innerHTML = '<span class="material-icons" style="font-size: 14px;">wifi_off</span> Offline';
+                    statusEl.classList.add('show');
+                }
+            }
+        }
+        
+        async function loadVideoList() {
+            try {
+                const response = await fetch('/videos');
+                const result = await response.json();
+                
+                const videoList = document.getElementById('video-list');
+                
+                if (result.success && result.videos.length > 0) {
+                    uploadedVideos = result.videos;
+                    videoList.innerHTML = result.videos.map(video => `
+                        <div class="video-item" onclick="selectVideo('${video.secure_filename}')">
+                            <span class="material-icons" style="opacity: 0.5;">play_circle_outline</span>
+                            <div class="video-info">
+                                <div class="video-name">${video.filename}</div>
+                                <div class="video-size">${video.size_formatted} • ${video.upload_date}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    videoList.innerHTML = '<div class="empty-state"><p>No videos found. Upload some videos first!</p></div>';
+                }
+            } catch (error) {
+                console.error('Failed to load video list:', error);
+                showAlert('Failed to load video list', 'error');
+            }
+        }
+        
+        function selectVideo(filename) {
+            selectedVideo = filename;
+            const videoItems = document.querySelectorAll('.video-item');
+            videoItems.forEach(item => item.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+        }
+        
+        const fileInput = document.getElementById('video-file');
+        const uploadArea = document.querySelector('.upload-area');
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        uploadArea.addEventListener('drop', handleDrop, false);
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight() {
+            uploadArea.classList.add('dragover');
+        }
+        
+        function unhighlight() {
+            uploadArea.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileSelect();
+        }
+        
+        async function handleFileSelect() {
+            if (!cookiesValidated) {
+                showAlert('Please configure instagram cookies first', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            if (file) {
+                uploadArea.classList.add('uploading');
+                uploadArea.innerHTML = `
+                    <span class="material-icons spinning" style="font-size: 2rem;">hourglass_empty</span>
+                    <p>Uploading ${file.name}...</p>
+                    <small>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                `;
+                
+                const formData = new FormData();
+                formData.append('video', file);
+                
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        uploadArea.classList.remove('uploading');
+                        uploadArea.innerHTML = `
+                            <span class="material-icons" style="font-size: 2rem; color: var(--success-color);">check_circle</span>
+                            <p>${file.name} uploaded successfully</p>
+                            <small>Ready for streaming</small>
+                        `;
+                        selectedVideo = result.filename;
+                        showAlert('Video uploaded successfully!', 'success');
+                    } else {
+                        uploadArea.classList.remove('uploading');
+                        uploadArea.innerHTML = `
+                            <span class="material-icons" style="font-size: 2rem; color: var(--danger-color);">error</span>
+                            <p>Upload failed</p>
+                            <small>Click to try again</small>
+                        `;
+                        showAlert(`Upload failed: ${result.message}`, 'error');
+                    }
+                } catch (error) {
+                    uploadArea.classList.remove('uploading');
+                    uploadArea.innerHTML = `
+                        <span class="material-icons" style="font-size: 2rem; color: var(--danger-color);">error</span>
+                        <p>Upload failed</p>
+                        <small>Click to try again</small>
+                    `;
+                    showAlert(`Upload error: ${error.message}`, 'error');
+                    updateConnectionStatus(false);
+                }
+            }
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${type}`;
+            alertDiv.innerHTML = message;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        async function startStream() {
+            if (!cookiesValidated) {
+                showAlert('Please configure instagram cookies first', 'error');
+                return;
+            }
+            
+            const cookies = localStorage.getItem('ig_cookies');
+            const title = document.getElementById('title').value;
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            
+            if (!cookies) {
+                showAlert('No saved instagram cookies found!', 'error');
+                return;
+            }
+            
+            streamDurationMs = calculateStreamDuration();
+            
+            let filename = null;
+            if (currentVideoSource === 'upload') {
+                filename = selectedVideo;
+                if (!filename) {
+                    showAlert('Please upload a video file first!', 'error');
+                    return;
+                }
+            } else if (currentVideoSource === 'download') {
+                showAlert('Please select a downloaded video from the library tab', 'error');
+                return;
+            } else if (currentVideoSource === 'select') {
+                filename = selectedVideo;
+                if (!filename) {
+                    showAlert('Please select a video from the library!', 'error');
+                    return;
+                }
+            }
+            
+            const formData = new FormData();
+            formData.append('cookies', cookies);
+            formData.append('filename', filename);
+            formData.append('title', title);
+            formData.append('hours', hours);
+            formData.append('minutes', minutes);
+            formData.append('seconds', seconds);
+            
+            const startBtn = document.getElementById('start-btn');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Starting...';
+            
+            try {
+                const response = await fetch('/api/start', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Live stream started successfully!', 'success');
+                    updateStreamStatus('live', result.broadcast_id);
+                    startTime = Date.now();
+                    document.getElementById('session-id').textContent = result.session_id.substring(0, 8);
+                    
+                    startMonitoring();
+                    
+                    if (streamDurationMs > 0) {
+                        durationCheckInterval = setInterval(checkStreamDuration, 10000); // Check every 10 seconds
+                        console.log(`Stream duration set to: ${hours}h ${minutes}m ${seconds}s`);
+                    }
+                    
+                    document.getElementById('stop-btn').disabled = false;
+                } else {
+                    showAlert(`Failed to start stream: ${result.message}`, 'error');
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '<span class="material-icons">play_arrow</span> Start';
+                }
+            } catch (error) {
+                showAlert(`Network error: ${error.message}`, 'error');
+                startBtn.disabled = false;
+                startBtn.innerHTML = '<span class="material-icons">play_arrow</span> Start';
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function stopStream() {
+            const stopBtn = document.getElementById('stop-btn');
+            stopBtn.disabled = true;
+            stopBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Stopping...';
+            
+            try {
+                const response = await fetch('/api/stop', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Stream stopped successfully!', 'success');
+                    updateStreamStatus('offline');
+                    stopMonitoring();
+                    
+                    if (durationCheckInterval) {
+                        clearInterval(durationCheckInterval);
+                        durationCheckInterval = null;
+                    }
+                    
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('start-btn').innerHTML = '<span class="material-icons">play_arrow</span> Start';
+                } else {
+                    showAlert(`Failed to stop stream: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Network error: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            }
+            
+            stopBtn.innerHTML = '<span class="material-icons">stop</span> Stop';
+        }
+        
+        function updateStreamStatus(status, broadcastId = '') {
+            const statusElement = document.getElementById('stream-status');
+            const broadcastIdElement = document.getElementById('broadcast-id');
+            
+            let statusText = '';
+            let statusClass = '';
+            
+            switch (status) {
+                case 'live':
+                    statusText = 'Live';
+                    statusClass = 'status-live';
+                    break;
+                case 'preparing':
+                    statusText = 'Preparing';
+                    statusClass = 'status-preparing';
+                    break;
+                default:
+                    statusText = 'Offline';
+                    statusClass = 'status-offline';
+            }
+            
+            statusElement.innerHTML = `
+                <span class="status-indicator ${statusClass}"></span>
+                ${statusText}
+            `;
+            
+            broadcastIdElement.value = broadcastId || 'Not available';
+        }
+        
+        function startMonitoring() {
+            console.log('Starting real-time monitoring...');
+            streamInterval = setInterval(updateStats, 3000);  
+            commentsInterval = setInterval(updateComments, 2000);  
+            updateDuration();
+            
+            setTimeout(updateStats, 500);
+            setTimeout(updateComments, 1000);
+        }
+        
+        function stopMonitoring() {
+            console.log('Stopping monitoring...');
+            if (streamInterval) {
+                clearInterval(streamInterval);
+                streamInterval = null;
+            }
+            
+            if (commentsInterval) {
+                clearInterval(commentsInterval);
+                commentsInterval = null;
+            }
+            
+            startTime = null;
+            commentCount = 0;
+            lastCommentIds.clear();
+            document.getElementById('comment-counter').textContent = '0';
+            document.getElementById('session-id').textContent = '-';
+        }
+        
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/info');
+                const result = await response.json();
+                
+                updateConnectionStatus(true);
+                
+                if (result.success && result.data) {
+                    const data = result.data;
+                    
+                    document.getElementById('viewer-count').textContent = data.viewer_count || 0;
+                    document.getElementById('comment-count').textContent = data.comment_count || 0;
+                    
+                    if (data.broadcast_id) {
+                        document.getElementById('broadcast-id').value = data.broadcast_id;
+                    }
+                } else if (!result.success && result.message.includes('No active')) {
+                    updateStreamStatus('offline');
+                    if (streamInterval) {
+                        showAlert('Stream ended', 'info');
+                        stopMonitoring();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function postComment() {
+            const commentInput = document.getElementById('comment-input');
+            const text = commentInput.value.trim();
+            const commentBtn = document.getElementById('comment-btn');
+            
+            if (!text) {
+                showAlert('Please enter a comment', 'error');
+                return;
+            }
+            
+            commentBtn.disabled = true;
+            commentBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Sending...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('text', text);
+                
+                const response = await fetch('/api/comment', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Comment posted successfully!', 'success');
+                    commentInput.value = '';
+                    setTimeout(() => {
+                        updateComments();
+                    }, 1000);
+                    
+                } else {
+                    showAlert(`Failed to post comment: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`Network error: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            } finally {
+                commentBtn.disabled = false;
+                commentBtn.innerHTML = '<span class="material-icons">send</span> Send';
+            }
+        }
+        
+        document.getElementById('comment-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                postComment();
+            }
+        });
+        
+        function hashCode(str) {
+          let hash = 0;
+          for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            hash |= 0;
+          }
+          return Math.abs(hash);
+        }
+        
+        async function updateComments() {
+            try {
+                const response = await fetch('/api/info');
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.comments) {
+                    const container = document.getElementById('comments-container');
+                    
+                    if (container.innerHTML.includes('No comments yet')) {
+                        container.innerHTML = '';
+                    }
+                    
+                    let newCommentsAdded = false;
+                    
+                    result.data.comments.forEach(comment => {
+                        const commentId = comment.id || `${comment.user}-${new Date(comment.time).getTime()}-${hashCode(comment.text)}`;
+                        
+                        if (!lastCommentIds.has(commentId)) {
+                            lastCommentIds.add(commentId);
+                            
+                            const commentDiv = document.createElement('div');
+                            commentDiv.className = 'comment-item';
+                            commentDiv.innerHTML = `
+                                <div class="comment-user">${comment.user || 'Unknown'}</div>
+                                <div class="comment-text">${comment.text || ''}</div>
+                                <div class="comment-time">${comment.time || new Date().toLocaleTimeString()}</div>
+                            `;
+                            container.appendChild(commentDiv);
+                            newCommentsAdded = true;
+                            commentCount++;
+                        }
+                    });
+                    
+                    if (newCommentsAdded) {
+                        while (container.children.length > 100) {
+                            const firstChild = container.firstChild;
+                            container.removeChild(firstChild);
+                            commentCount = Math.max(0, commentCount - 1);
+                        }
+                        
+                        container.scrollTo({
+                            top: container.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                        
+                        document.getElementById('comment-counter').textContent = commentCount;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update comments:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        function updateDuration() {
+            if (startTime) {
+                const now = Date.now();
+                const diff = Math.floor((now - startTime) / 1000);
+                updateDurationDisplay(diff);
+                setTimeout(updateDuration, 1000);
+            }
+        }
+        
+        function updateDurationDisplay(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            let display;
+            if (hours > 0) {
+                display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                display = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            document.getElementById('duration').textContent = display;
+        }
+        
+        async function refreshStats() {
+            console.log('Manual refresh triggered');
+            const refreshBtn = document.getElementById('refresh-btn');
+            const originalContent = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Loading...';
+            refreshBtn.disabled = true;
+            
+            try {
+                await Promise.all([updateStats(), updateComments()]);
+                showAlert('Stats refreshed successfully!', 'success');
+            } catch (error) {
+                showAlert('Failed to refresh stats', 'error');
+            } finally {
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        async function healthCheck() {
+            try {
+                const response = await fetch('/health');
+                const result = await response.json();
+                updateConnectionStatus(result.status === 'healthy');
+                return result.status === 'healthy';
+            } catch (error) {
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+        
+        setInterval(async () => {
+            if (!streamInterval) {
+                await healthCheck();
+            }
+        }, 10000);
+        
+        loadSavedCookies();
+        
+        fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Initial status check:', data);
+                if (data.success && data.is_live) {
+                    updateStreamStatus('live', data.broadcast_id);
+                    startMonitoring();
+                    document.getElementById('stop-btn').disabled = false;
+                    document.getElementById('start-btn').disabled = true;
+                    showAlert('Resumed monitoring active stream', 'info');
+                }
+                updateConnectionStatus(true);
+            })
+            .catch(error => {
+                console.error('Initial status check failed:', error);
+                updateConnectionStatus(false);
+            });
+        
+        if (currentVideoSource === 'select') {
+            loadVideoList();
+        }
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('Page hidden - reducing update frequency');
+                if (streamInterval) {
+                    clearInterval(streamInterval);
+                    streamInterval = setInterval(updateStats, 10000);
+                }
+            } else {
+                console.log('Page visible - restoring update frequency');
+                if (streamInterval) {
+                    clearInterval(streamInterval);
+                    streamInterval = setInterval(updateStats, 3000);
+                }
+            }
+        });
+        
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            updateConnectionStatus(true);
+            if (streamInterval) {
+                updateStats();
+                updateComments();
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('Connection lost');
+            updateConnectionStatus(false);
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            stopMonitoring();
+        });
+    </script>
+</body>
+</html>

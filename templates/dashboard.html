@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - InStream</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="connection-status" id="connection-status">
+        <span class="material-icons" style="font-size: 14px;">wifi</span> Connected
+    </div>
+    <div class="container">
+        <div class="navbar">
+            <div class="navbar-top">
+                <h1 class="app-title">
+                    <span class="material-icons">dashboard</span>
+                    InStream
+                </h1>
+                <div class="navbar-actions">
+                    <a href="/" class="button info-button">
+                        <span class="material-icons">home</span>
+                        Home
+                    </a>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span class="material-icons">brightness_6</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="alert-container"></div>
+        <div class="stream-status status-offline" id="stream-status">
+            <span class="status-indicator status-offline" id="status-indicator"></span>
+            <div>
+                <strong>Status:</strong> <span id="status-text">Offline</span>
+                <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-top: var(--spacing-xs);" id="status-details">
+                    Ready to stream
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <span class="material-icons">analytics</span>
+                    Overview
+                </h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-videos">{{ total_videos or 0 }}</div>
+                    <div class="stat-label">Total Videos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="current-viewers">0</div>
+                    <div class="stat-label">Current Viewers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="total-comments">0</div>
+                    <div class="stat-label">Total Comments</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stream-duration">00:00</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+            </div>
+        </div>
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="material-icons">video_library</span>
+                        Video Management
+                    </h3>
+                </div>
+                <div class="upload-area" id="upload-section" onclick="document.getElementById('file-input').click()">
+                    <input type="file" id="file-input" accept="video/*" style="display: none;">
+                    <div id="upload-content">
+                        <span class="material-icons" style="font-size: 2rem;">cloud_upload</span>
+                        <p><strong>Upload New Video</strong></p>
+                        <small>Click here or drag & drop video files</small>
+                    </div>
+                </div>
+                <br>
+                <div class="video-list" id="video-list">
+                    {% if videos %}
+                        {% for video in videos %}
+                        <div class="video-item" data-filename="{{ video.secure_filename }}">
+                            <span class="material-icons">movie</span>
+                            <div class="video-info">
+                                <div class="video-name">{{ video.filename }}</div>
+                                <div class="video-size">{{ video.size_formatted }} • {{ video.upload_date }}</div>
+                            </div>
+                            <div class="video-actions">
+                                <button class="action-btn use-btn" onclick="useVideo('{{ video.secure_filename }}', '{{ video.filename }}')">
+                                    <span class="material-icons">play_arrow</span>
+                                    Use
+                                </button>
+                                <button class="action-btn delete-btn" onclick="deleteVideo('{{ video.secure_filename }}', '{{ video.filename }}')">
+                                    <span class="material-icons">delete</span>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="material-icons">video_library</div>
+                        <p>No videos uploaded yet</p>
+                        <small>Upload your first video to get started</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <span class="material-icons">flash_on</span>
+                        Quick Actions
+                    </h3>
+                </div>
+                
+                <div class="form-group">
+                    <a href="/" class="button primary-button full-width">
+                        <span class="material-icons">videocam</span>
+                        Start Stream
+                    </a>
+                </div>
+                <div class="form-group">
+                    <button class="button success-button full-width" onclick="refreshData()" id="refresh-btn">
+                        <span class="material-icons">refresh</span>
+                        Refresh Data
+                    </button>
+                </div>
+                <div class="form-group">
+                    <button class="button info-button full-width" onclick="checkHealth()">
+                        <span class="material-icons">health_and_safety</span>
+                        Health Check
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <button class="button danger-button full-width" onclick="clearAll()" id="clear-btn">
+                        <span class="material-icons">clear_all</span>
+                        Clear All Videos
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-text">
+            © 2025 InStream. All Rights Reserved
+        </div>
+    </div>
+    
+    <script>
+        let refreshInterval = null;
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            if (connected) {
+                statusEl.className = 'connection-status connection-online';
+                statusEl.innerHTML = '<span class="material-icons" style="font-size: 14px;">wifi</span> Connected';
+                statusEl.classList.remove('show');
+            } else {
+                statusEl.className = 'connection-status connection-offline';
+                statusEl.innerHTML = '<span class="material-icons" style="font-size: 14px;">wifi_off</span> Offline';
+                statusEl.classList.add('show');
+            }
+        }
+        
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        
+        fileInput.addEventListener('change', handleFileUpload);
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadSection.addEventListener(eventName, unhighlight, false);
+        });
+        
+        uploadSection.addEventListener('drop', handleDrop, false);
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight() {
+            uploadSection.classList.add('dragover');
+        }
+        
+        function unhighlight() {
+            uploadSection.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFileUpload();
+        }
+        
+        async function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            const uploadContent = document.getElementById('upload-content');
+            uploadSection.classList.add('uploading');
+            
+            uploadContent.innerHTML = `
+                <span class="material-icons spinning" style="font-size: 2rem;">hourglass_empty</span>
+                <p><strong>Uploading ${file.name}...</strong></p>
+                <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(`${file.name} uploaded successfully!`, 'success');
+                    setTimeout(() => {
+                        location.reload(); // Refresh to show new video
+                    }, 1500);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showAlert(`Upload failed: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            } finally {
+                uploadSection.classList.remove('uploading');
+                uploadContent.innerHTML = `
+                    <span class="material-icons" style="font-size: 2rem;">cloud_upload</span>
+                    <p><strong>Upload New Video</strong></p>
+                    <small>Click here or drag & drop video files</small>
+                `;
+                fileInput.value = '';
+            }
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alert-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${type}`;
+            alertDiv.innerHTML = message;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        function useVideo(filename, displayName) {
+            localStorage.setItem('selectedVideo', filename);
+            localStorage.setItem('selectedVideoName', displayName);
+            window.location.href = '/';
+        }
+        
+        async function deleteVideo(filename, displayName) {
+            if (!confirm(`Are you sure you want to delete "${displayName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/delete/${filename}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert(`${displayName} deleted successfully!`, 'success');
+                    
+                    const videoItem = document.querySelector(`[data-filename="${filename}"]`);
+                    if (videoItem) {
+                        videoItem.remove();
+                    }
+                    
+                    const totalVideos = document.getElementById('total-videos');
+                    const currentCount = parseInt(totalVideos.textContent) || 0;
+                    totalVideos.textContent = Math.max(0, currentCount - 1);
+                    
+                    const videoList = document.getElementById('video-list');
+                    if (videoList.children.length === 0) {
+                        videoList.innerHTML = `
+                            <div class="empty-state">
+                                <div class="material-icons">video_library</div>
+                                <p>No videos uploaded yet</p>
+                                <small>Upload your first video to get started</small>
+                            </div>
+                        `;
+                    }
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                showAlert(`Failed to delete video: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function refreshData() {
+            const refreshBtn = document.getElementById('refresh-btn');
+            const originalContent = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Updating...';
+            refreshBtn.disabled = true;
+            
+            try {
+                await updateStreamStatus();
+                showAlert('Data refreshed successfully!', 'success');
+                updateConnectionStatus(true);
+            } catch (error) {
+                showAlert('Failed to refresh data', 'error');
+                updateConnectionStatus(false);
+            } finally {
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            }
+        }
+        
+        async function updateStreamStatus() {
+            try {
+                const [statusResponse, infoResponse] = await Promise.all([
+                    fetch('/status'),
+                    fetch('/api/info')
+                ]);
+                
+                const statusData = await statusResponse.json();
+                const infoData = await infoResponse.json();
+                
+                const statusElement = document.getElementById('stream-status');
+                const statusIndicator = document.getElementById('status-indicator');
+                const statusText = document.getElementById('status-text');
+                const statusDetails = document.getElementById('status-details');
+                
+                if (statusData.success && statusData.is_live) {
+                    statusElement.className = 'stream-status status-live';
+                    statusIndicator.className = 'status-indicator status-live';
+                    statusText.textContent = 'Live Streaming';
+                    statusDetails.textContent = `Broadcast ID: ${statusData.broadcast_id || 'Unknown'}`;
+                    
+                    if (infoData.success && infoData.data) {
+                        document.getElementById('current-viewers').textContent = infoData.data.viewer_count || 0;
+                        document.getElementById('total-comments').textContent = infoData.data.comment_count || 0;
+                    }
+                } else {
+                    statusElement.className = 'stream-status status-offline';
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusText.textContent = 'Offline';
+                    statusDetails.textContent = 'Ready to stream';
+                    
+                    document.getElementById('current-viewers').textContent = '0';
+                    document.getElementById('total-comments').textContent = '0';
+                    document.getElementById('stream-duration').textContent = '00:00';
+                }
+                
+                updateConnectionStatus(true);
+            } catch (error) {
+                console.error('Failed to update stream status:', error);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const result = await response.json();
+                
+                if (result.status === 'healthy') {
+                    showAlert('Application is healthy and running normally', 'success');
+                    updateConnectionStatus(true);
+                } else {
+                    showAlert('Application health check failed', 'error');
+                    updateConnectionStatus(false);
+                }
+            } catch (error) {
+                showAlert('Unable to perform health check', 'error');
+                updateConnectionStatus(false);
+            }
+        }
+        
+        async function clearAll() {
+            if (!confirm('Are you sure you want to delete ALL videos? This action cannot be undone!')) {
+                return;
+            }
+            
+            const clearBtn = document.getElementById('clear-btn');
+            const originalContent = clearBtn.innerHTML;
+            clearBtn.innerHTML = '<span class="material-icons spinning">hourglass_empty</span> Clearing...';
+            clearBtn.disabled = true;
+            
+            try {
+                const videoItems = document.querySelectorAll('.video-item[data-filename]');
+                let deletedCount = 0;
+                let failedCount = 0;
+                
+                for (const item of videoItems) {
+                    const filename = item.dataset.filename;
+                    try {
+                        const response = await fetch(`/api/delete/${filename}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            item.remove();
+                            deletedCount++;
+                        } else {
+                            failedCount++;
+                        }
+                    } catch (error) {
+                        failedCount++;
+                    }
+                }
+                
+                if (deletedCount > 0) {
+                    showAlert(`Successfully deleted ${deletedCount} video(s)${failedCount > 0 ? `, ${failedCount} failed` : ''}`, 'success');
+                    
+                    document.getElementById('total-videos').textContent = '0';
+                    
+                    const videoList = document.getElementById('video-list');
+                    videoList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="material-icons">video_library</div>
+                            <p>No videos uploaded yet</p>
+                            <small>Upload your first video to get started</small>
+                        </div>
+                    `;
+                } else if (failedCount > 0) {
+                    showAlert(`Failed to delete ${failedCount} video(s)`, 'error');
+                } else {
+                    showAlert('No videos to delete', 'info');
+                }
+                
+                updateConnectionStatus(true);
+            } catch (error) {
+                showAlert('Failed to clear videos', 'error');
+                updateConnectionStatus(false);
+            } finally {
+                clearBtn.innerHTML = originalContent;
+                clearBtn.disabled = false;
+            }
+        }
+        
+        function startAutoRefresh() {
+            refreshInterval = setInterval(updateStreamStatus, 10000); // Every 10 seconds
+        }
+        
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+        
+        console.log('Dashboard InStream loaded');
+        
+        updateStreamStatus();
+        
+        startAutoRefresh();
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                updateStreamStatus();
+                startAutoRefresh();
+            }
+        });
+        
+        window.addEventListener('beforeunload', () => {
+            stopAutoRefresh();
+        });
+        
+        window.addEventListener('online', () => {
+            console.log('Connection restored');
+            updateConnectionStatus(true);
+            updateStreamStatus();
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('Connection lost');
+            updateConnectionStatus(false);
+        });
+        
+        window.addEventListener('load', () => {
+            const selectedVideo = localStorage.getItem('selectedVideo');
+            const selectedVideoName = localStorage.getItem('selectedVideoName');
+            
+            if (selectedVideo && selectedVideoName) {
+                localStorage.removeItem('selectedVideo');
+                localStorage.removeItem('selectedVideoName');
+                
+                showAlert(`Video "${selectedVideoName}" was selected for streaming`, 'info');
+                
+                const videoItem = document.querySelector(`[data-filename="${selectedVideo}"]`);
+                if (videoItem) {
+                    videoItem.style.background = 'rgba(37, 99, 235, 0.1)';
+                    videoItem.style.transform = 'translateX(4px)';
+                    
+                    setTimeout(() => {
+                        videoItem.style.background = '';
+                        videoItem.style.transform = '';
+                    }, 3000);
+                }
+            }
+        });
+        
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                updateConnectionStatus(data.status === 'healthy');
+            })
+            .catch(error => {
+                console.error('Initial health check failed:', error);
+                updateConnectionStatus(false);
+            });
+    </script>
+</body>
+</html>
