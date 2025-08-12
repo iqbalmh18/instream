@@ -1,5 +1,4 @@
-## InStream
-Instagram Live Streaming Manager
+[![instream.png](https://i.postimg.cc/kXfVzXVd/Desain-tanpa-judul.png)](https://postimg.cc/QHKxWDk6)
 
 ## Introduction
 InStream is a Flask-based web application for managing Instagram live streaming sessions.  
@@ -50,8 +49,8 @@ This tool is designed for content creators who want **full control over their In
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/InStream.git
-cd InStream
+git clone https://github.com/iqbalmh18/instream.git
+cd instream
 ```
 
 ### 2. Create a virtual environment
