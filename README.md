@@ -1,5 +1,5 @@
 # InStream
-Instagram Live Streming Manager
+Instagram Live Streaming Manager
 
 ![light](https://i.postimg.cc/MzjkT3Dy/20250812-153206.png)
 ![dark](https://i.postimg.cc/8182rdKx/20250812-153359.png)
