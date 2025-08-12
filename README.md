@@ -88,7 +88,7 @@ All configuration is handled in `config.py` (via `Config` class), including:
 
 ### 1. Start the application
 ```bash
-python app.py
+python3 app.py
 ```
 Access the app in your browser at:
 ```
