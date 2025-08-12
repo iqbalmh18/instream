@@ -15,13 +15,13 @@ This tool is designed for content creators who want **full control over their In
 ---
 
 ## Table of Contents
-- [Features](#-features)
-- [Installation](#-installation)
-- [Configuration](#-configuration)
-- [Usage](#-usage)
-- [Endpoints](#-endpoints)
-- [Troubleshooting](#-troubleshooting)
-- [License](#-license)
+- [Features](#features)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Endpoints](#endpoints)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
 ---
 
