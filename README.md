@@ -4,12 +4,13 @@
 InStream is a Flask-based web application for managing Instagram live streaming sessions.  
 It provides a **modern dashboard** and **interactive control panel** to:
 - Upload, select, and manage videos
+- Looping video based on duration
 - Start and stop live streams
 - View live analytics (viewers, comments, duration)
 - Post comments in real-time
 - Monitor application health
 
-This tool is designed for content creators who want **full control over their Instagram Live broadcasts** from a desktop-friendly interface.
+This tool is designed for content creators who want **full control over their Instagram Live broadcasts** from a mobile-friendly interface.
 
 ---
 
@@ -76,9 +77,9 @@ export FLASK_DEBUG=true
 ## Configuration
 
 All configuration is handled in `config.py` (via `Config` class), including:
-- `LOG_FOLDER` â€“ location for application logs
-- `LOG_LEVEL` â€“ logging verbosity
-- `MAX_CONTENT_LENGTH` â€“ max upload size (default: 1GB)
+- `LOG_FOLDER` location for application logs
+- `LOG_LEVEL` logging verbosity
+- `MAX_CONTENT_LENGTH` max upload size (default: 1GB)
 - Instagram API and streaming settings (custom implementation in `utils.LiveStreamManager`)
 
 ---
