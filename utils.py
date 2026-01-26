@@ -5,12 +5,8 @@ from werkzeug.utils import secure_filename
 from flask import current_app
 from config import Config
 
-def allowed_file(filename):
-    """Check if file extension is allowed"""
-    if '.' not in filename:
-        return False
-    extension = filename.rsplit('.', 1)[1].lower()
-    return extension in Config.ALLOWED_VIDEO_EXTENSIONS
+# Import validators from helpers module
+from helpers.validators import validate_file as allowed_file
 
 def get_file_size(filepath):
     """Get file size in bytes"""
@@ -38,19 +34,7 @@ def get_file_creation_date(filepath):
     except OSError:
         return "Unknown"
 
-def validate_duration(hours, minutes, seconds):
-    """Validate stream duration"""
-    if hours < 0 or minutes < 0 or seconds < 0:
-        return False, "Duration values cannot be negative"
-    
-    if minutes >= 60 or seconds >= 60:
-        return False, "Minutes and seconds must be less than 60"
-    
-    total_hours = hours + (minutes / 60) + (seconds / 3600)
-    if total_hours > Config.MAX_STREAM_DURATION_HOURS:
-        return False, f"Maximum stream duration is {Config.MAX_STREAM_DURATION_HOURS} hours"
-    
-    return True, None
+
 
 def safe_remove_file(filepath):
     """Safely remove file if it exists"""

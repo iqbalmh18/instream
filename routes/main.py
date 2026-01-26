@@ -73,6 +73,8 @@ def health_check():
         import os
         from config import Config
         from datetime import datetime
+        from __init__ import __version__
+        
         upload_folder_ok = os.path.exists(Config.UPLOAD_FOLDER) and os.access(Config.UPLOAD_FOLDER, os.W_OK)
         try:
             import psutil
@@ -84,7 +86,7 @@ def health_check():
         status = {
             'status': 'healthy',
             'timestamp': datetime.utcnow().isoformat(),
-            'version': '2.0',
+            'version': __version__,
             'checks': {
                 'upload_folder': 'ok' if upload_folder_ok else 'error',
                 'memory_usage': f'{memory_usage:.1f}%' if memory_usage > 0 else 'unknown',
@@ -104,9 +106,10 @@ def health_check():
         return jsonify(status)
         
     except Exception as e:
+        from __init__ import __version__
         return jsonify({
             'status': 'unhealthy',
             'timestamp': datetime.utcnow().isoformat(),
             'error': str(e),
-            'version': '2.0'
+            'version': __version__
         }), 500

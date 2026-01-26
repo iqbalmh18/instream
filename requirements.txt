@@ -1,3 +1,6 @@
 flask
 pygramcl
 requests
+dotenv
+google_generativeai
+Pillow

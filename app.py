@@ -100,10 +100,11 @@ def register_request_handlers(app):
     
     @app.context_processor
     def inject_template_vars():
+        from __init__ import __version__, __app_name__
         return {
             'current_time': datetime.now(),
-            'app_name': 'Instagram Live Streaming',
-            'app_version': '2.0.0'
+            'app_name': __app_name__,
+            'app_version': __version__
         }
 
 def cleanup_on_exit(app):
@@ -138,5 +139,5 @@ if __name__ == '__main__':
     app.run(
         host=os.getenv('FLASK_HOST', '0.0.0.0'),
         port=int(os.getenv('FLASK_PORT', 5000)),
-        debug=True #os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+        debug=True
     )

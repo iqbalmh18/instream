@@ -9,7 +9,7 @@ class Config:
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'static/upload')
     LOG_FOLDER = os.getenv('LOG_FOLDER', 'logs')
     LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
-    SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
+    SECRET_KEY = os.getenv('FLASK_SECRET_KEY', "ini-secret-key-paling-aman")
     DEFAULT_LIVE_TITLE = os.getenv('DEFAULT_LIVE_TITLE', 'LIVE')
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_FILE_SIZE_MB', 1000)) * 1024 * 1024
     ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv'}
