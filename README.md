@@ -1,157 +1,272 @@
-# InStream
-Instagram Live Streaming Manager
+# InStream Instagram Live Streaming Manager
 
-![light](https://i.postimg.cc/MzjkT3Dy/20250812-153206.png)
-![dark](https://i.postimg.cc/8182rdKx/20250812-153359.png)
+InStream is a Flask-based web application for managing Instagram live streaming sessions. It provides a comprehensive dashboard and interactive control panel for uploading, selecting, and managing videos, as well as controlling live broadcasts with real-time analytics and engagement features.
 
-## Introduction
-InStream is a Flask-based web application for managing Instagram live streaming sessions.  
-It provides a **modern dashboard** and **interactive control panel** to:
-- Upload, select, and manage videos
-- Looping video based on duration
-- Start and stop live streams
-- View live analytics (viewers, comments, duration)
-- Post comments in real-time
-- Monitor application health
+## Overview
 
-This tool is designed for content creators who want **full control over their Instagram Live broadcasts** from a mobile-friendly interface.
+This tool is designed for content creators who require full control over their Instagram Live broadcasts from a mobile-friendly interface. The application offers secure authentication, video management, live stream control, and real-time monitoring capabilities.
 
----
+## Key Features
 
-## Table of Contents
-- [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Endpoints](#endpoints)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
+**Authentication & Security**
+- Secure cookie-based authentication for Instagram sessions
+- Session validation and management
+- Secure storage of streaming credentials
 
----
+**Video Management**
+- Upload videos with drag and drop support
+- Download videos from Instagram URLs
+- Organize and manage video library
+- Delete or clear videos from library
 
-## Features
-- **Secure Cookie Authentication**: Save and validate Instagram session cookies.
-- **Video Management**:
-  - Upload videos (drag & drop support)
-  - Download Instagram videos via URL
-  - Select from an uploaded video library
-  - Delete or clear all videos
-- **Live Stream Control**:
-  - Start/stop streams with custom title and duration
-  - Auto-stop after a specified time
-- **Real-time Monitoring**:
-  - View viewer count, comment count, and broadcast duration
-  - Live comment feed with posting capability
-- **Dashboard Analytics**:
-  - Total uploaded videos
-  - Current stream status
-  - Quick actions and health checks
-- **Dark Mode** toggle
+**Live Stream Control**
+- Start and stop streams with custom titles
+- Set custom stream duration with auto-stop capability
+- Real-time stream management and monitoring
 
----
+**Real-Time Analytics & Monitoring**
+- Live viewer count tracking
+- Comment monitoring and management
+- Broadcast duration tracking
+- Live comment feed with posting capability
+
+**Dashboard**
+- Analytics overview
+- Stream status indicators
+- Quick action controls
+- Application health monitoring
+- Dark mode support
+
+## Requirements
+
+- Python 3.8 or higher
+- Flask web framework
+- Virtual environment support
 
 ## Installation
 
-### 1. Clone the repository
+### Step 1: Clone Repository
+
 ```bash
 git clone https://github.com/iqbalmh18/instream.git
 cd instream
 ```
 
-### 2. Create a virtual environment
+### Step 2: Set Up Virtual Environment
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install dependencies
+On Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Step 3: Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Set environment variables
+### Step 4: Configure Environment
+
 ```bash
 export FLASK_HOST=0.0.0.0
 export FLASK_PORT=5000
 export FLASK_DEBUG=true
 ```
 
----
+On Windows (Command Prompt):
+```bash
+set FLASK_HOST=0.0.0.0
+set FLASK_PORT=5000
+set FLASK_DEBUG=true
+```
 
 ## Configuration
 
-All configuration is handled in `config.py` (via `Config` class), including:
-- `LOG_FOLDER` location for application logs
-- `LOG_LEVEL` logging verbosity
-- `MAX_CONTENT_LENGTH` max upload size (default: 1GB)
-- Instagram API and streaming settings (custom implementation in `utils.LiveStreamManager`)
+All application configuration is managed through the `config.py` file using the `Config` class. Key settings include:
 
----
+**Application Settings**
+- `LOG_FOLDER`: Directory location for application logs
+- `LOG_LEVEL`: Logging verbosity level
+- `MAX_CONTENT_LENGTH`: Maximum file upload size (default: 1GB)
+
+**Streaming Settings**
+- Instagram API configuration
+- Streaming protocol settings
+- Custom implementation via `utils.LiveStreamManager`
+
+For detailed configuration options, refer to the `config.py` file in the project root.
 
 ## Usage
 
-### 1. Start the application
+### Starting the Application
+
 ```bash
 python3 app.py
 ```
-Access the app in your browser at:
-```
-http://localhost:5000
-```
 
-### 2. Set up Instagram cookies
-- Navigate to the **Home** page
-- Paste your Instagram session cookies into the cookie input
-- Save & test cookies
+Access the application at `http://localhost:5000`
 
-### 3. Prepare your video
-- Upload from your PC
-- Download from Instagram by URL
-- Select from your library
+### Setting Up Instagram Cookies
 
-### 4. Start streaming
-- Set your stream title and duration
-- Click **Start** and monitor stats in real-time
+1. Navigate to the Home page
+2. Enter your Instagram session cookies in the provided field
+3. Click Save and test to validate cookies
 
-### 5. Manage the stream
-- Post comments
-- Stop stream manually or let it auto-stop after duration
+### Preparing Your Video
 
----
+Select one of the following methods:
+- Upload a video file from your computer
+- Download a video from Instagram using its URL
+- Select an existing video from your library
 
-## Endpoints
+### Starting a Stream
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET`  | `/` | Home page (stream control) |
-| `GET`  | `/dashboard` | Dashboard & analytics |
-| `POST` | `/api/upload` | Upload video file |
-| `POST` | `/api/download` | Download Instagram video |
-| `DELETE` | `/api/delete/<filename>` | Delete a video |
-| `POST` | `/api/validate-cookies` | Validate Instagram cookies |
-| `POST` | `/api/start` | Start live stream |
-| `POST` | `/api/stop` | Stop live stream |
-| `GET`  | `/api/info` | Get current stream info |
-| `POST` | `/api/comment` | Post a comment to the stream |
-| `GET`  | `/videos` | Fetch video library list |
-| `GET`  | `/health` | Application health check |
-| `GET`  | `/status` | Current stream status |
+1. Enter a custom title for your stream
+2. Set the stream duration
+3. Click Start to begin streaming
+4. Monitor live statistics in real-time
 
----
+### Managing the Stream
+
+- Post comments to engage with viewers
+- Stop the stream manually at any time
+- Allow automatic stop after the specified duration
+- Monitor viewer count and engagement metrics
+
+## API Endpoints
+
+### Stream Management
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/` | Home page and stream control interface |
+| GET | `/dashboard` | Dashboard with analytics and overview |
+| POST | `/api/start` | Start a new live stream |
+| POST | `/api/stop` | Stop the current live stream |
+| GET | `/api/info` | Retrieve current stream information |
+| GET | `/api/status` | Get current streaming status |
+
+### Video Management
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/upload` | Upload video file |
+| POST | `/api/download` | Download video from Instagram URL |
+| DELETE | `/api/delete/<video_id>` | Delete specific video |
+| GET | `/videos` | Fetch complete video library |
+
+### Session Management
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/validate-cookies` | Validate Instagram session cookies |
+
+### Engagement
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/comment` | Post comment to live stream |
+
+### Monitoring
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET | `/health` | Application health status |
 
 ## Troubleshooting
 
-**Issue:** Upload fails with "File too large"  
-**Solution:** Increase `MAX_CONTENT_LENGTH` in `config.py`.
+**Upload Fails with File Size Error**
 
-**Issue:** "Invalid cookies" when saving session  
-**Solution:** Make sure cookies are copied correctly from browser DevTools â†’ Application â†’ Cookies.
+The upload was rejected due to file size limits. To resolve this:
+1. Increase `MAX_CONTENT_LENGTH` value in `config.py`
+2. Ensure your video file meets the size requirements
+3. Try uploading again
 
-**Issue:** Dashboard shows "Offline" despite streaming  
-**Solution:** Check `/api/info` response in browser console for backend errors.
+**Invalid Cookies Error When Saving**
 
----
+Ensure your Instagram cookies are correctly extracted:
+1. Open Instagram in your browser
+2. Access Developer Tools (F12 or right-click > Inspect)
+3. Navigate to Application tab
+4. Select Cookies
+5. Copy the session cookie values
+6. Paste them into the application
+
+**Dashboard Shows Offline Status**
+
+If the dashboard indicates offline status despite active streaming:
+1. Check the browser console for error messages
+2. Verify the `/api/info` endpoint response
+3. Confirm backend server is running
+4. Review application logs in the LOG_FOLDER directory
+
+**Video Upload Timeout**
+
+If video uploads are timing out:
+1. Check your network connection
+2. Try uploading a smaller file first
+3. Verify the Flask server is responsive
+4. Check available disk space
+
+## Project Structure
+
+```
+instream/
+├── app.py                 # Main Flask application
+├── config.py              # Configuration settings
+├── requirements.txt       # Python dependencies
+├── utils.py               # Utility functions and LiveStreamManager
+├── templates/             # HTML templates
+├── static/                # CSS and JavaScript files
+├── uploads/               # Video upload directory
+└── logs/                  # Application logs
+```
+
+## Development
+
+### Running in Debug Mode
+
+```bash
+export FLASK_DEBUG=true
+python3 app.py
+```
+
+### Viewing Logs
+
+Application logs are stored in the configured `LOG_FOLDER`. Check these logs for detailed error messages and system information.
+
+### Testing Endpoints
+
+Use tools like curl or Postman to test API endpoints:
+
+```bash
+curl -X POST http://localhost:5000/api/validate-cookies \
+  -H "Content-Type: application/json" \
+  -d '{"cookies": "your_cookie_string"}'
+```
+
+## Contributing
+
+To contribute to this project:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## License
-This project is licensed under the MIT License.  
-See the `LICENSE` file for details.
+
+This project is licensed under the MIT License. See the LICENSE file for complete license information.
+
+## Support
+
+For issues, questions, or feature requests, please open an issue on the GitHub repository or contact the development team.
+
+## Disclaimer
+
+This tool is intended for personal use and educational purposes. Ensure compliance with Instagram's Terms of Service and community guidelines when using this application.
