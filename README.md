@@ -1,4 +1,4 @@
-# InStream Instagram Live Streaming Manager
+## Instagram Live Streaming Manager
 
 InStream is a Flask-based web application for managing Instagram live streaming sessions. It provides a comprehensive dashboard and interactive control panel for uploading, selecting, and managing videos, as well as controlling live broadcasts with real-time analytics and engagement features.
 
